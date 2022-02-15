@@ -1,0 +1,52 @@
+version: '3.9'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - elastic
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    container_name: kib01
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es01:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+  logstash: 
+    image: docker.elastic.co/logstash/logstash:7.17.0
+    container_name: logs01
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    ports:
+      - 9600:9600
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+      - rabbitmq
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbit01
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - elastic
+networks:
+  elastic:
+    driver: bridge
+    name: elastic
+volumes:
+  esdata:
+    driver: local
