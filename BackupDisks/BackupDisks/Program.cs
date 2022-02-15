@@ -5,6 +5,13 @@ using Serilog;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.RabbitMQ;
 
+if (Environment.GetCommandLineArgs().Length != 3) 
+{
+    Console.Error.WriteLine("Onvalid command line arguments");
+    Console.Error.WriteLine("\t\tBackupDisks /source/path/ /destination/path/ ");
+    return;
+}
+
 var loggerConfig = new LoggerConfiguration()
     .WriteTo.RabbitMQ((clientConfig, sinksConfig) =>
     {
@@ -24,7 +31,7 @@ var loggerConfig = new LoggerConfiguration()
 
 var asyncBackup = new AsyncBackup(loggerConfig.CreateLogger());
 
-asyncBackup.Copy("/home/ripalbarot/WebstormProjects", "/home/ripalbarot/Temp");
+asyncBackup.Copy(Environment.GetCommandLineArgs()[1], Environment.GetCommandLineArgs()[2]);
 
 Console.WriteLine("Type 'Quit' to exit.");
 var inStr = string.Empty;

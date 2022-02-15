@@ -33,3 +33,4 @@ output {
 3. add some logs by passing some messages to queue.
 4. go to Kibana [http://localhost:5601](http://localhost:5601).
 5. [create index pattern as described in the link and view your logs.](https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html)
+6. to test it with the docker
