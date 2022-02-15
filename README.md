@@ -4,33 +4,15 @@
 
 Here is a simple [docker-compose](https://github.com/ripplejb/ekl-stack/blob/master/docker-compose.yml) file to create the stack on docker. I have also added the rabbitmq to push data to the logstash.
 
-Before you begin, open the file [logstash/pipeline/ logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf) and rename the queue and index as needed. See **TODO** in the JSON below.
-
-Run command `docker-compose up` to build and start the containers.
+1. Install [Docker](https://docs.docker.com/get-docker/).
+1. Install [Docker-Compose](https://docs.docker.com/compose/).
+1. Checkout the [repository](https://github.com/ripplejb/ekl-stack).
+1. Run command `docker-compose up` to build and start the containers.
 Once containers are running, 
-1. go to [http://localhost:15672](http://localhost:15672) to rabbitmq admin. 
-2. create a queue with the same name as mentioned in the [logstash/pipeline/ logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf). See **TODO** in the JSON below.
- ```
-input {
-rabbitmq {
-    id => "rabbit01"
-    host => "rabbit01"
-    port => 5672
-    vhost => "/"
-    queue => "backup"   // TODO: rename it to your queue name
-    ack => false
-  }}
+1. Go to [http://localhost:15672](http://localhost:15672) to rabbitmq admin. 
+1. Create a queue named `backup-log` as mentioned in the [logstash/pipeline/logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf). 
+1. Create an exchange named `app-logging` and bind it with the queue `backup-log` using route key named `backup-rk`.
+1. Run the [sample .net application BackupDisks](https://github.com/ripplejb/ekl-stack/tree/master/BackupDisks): `BackupDisks /path/to/source/folder/ /path/to/destination/folder/`.
+1. Go to Kibana [http://localhost:5601](http://localhost:5601).
+1. [Create index pattern as described in the link and view your logs.](https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html)
 
-## Add your filters / logstash plugins configuration here
-
-output {
-  elasticsearch {
-    hosts => "es01:9200"
-    index => "logstash_rabbit_mq_backup"   // TODO: rename it to your index name
-  }
-}
-```
-3. add some logs by passing some messages to queue.
-4. go to Kibana [http://localhost:5601](http://localhost:5601).
-5. [create index pattern as described in the link and view your logs.](https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html)
-6. to test it with the docker
