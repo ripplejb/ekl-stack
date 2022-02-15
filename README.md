@@ -2,14 +2,14 @@
 
 [Elasticsearch, Kibana, and Logstash (also known as ELK Stack)](https://www.elastic.co/elastic-stack?ultron=B-Stack-Trials-AMER-US-C&gambit=Stack-ELK-Exact&blade=adwords-s&hulk=paid&Device=c&thor=elk%20stack&gclid=Cj0KCQiAmKiQBhClARIsAKtSj-lf1j3rNlwsu6tWZzoNYQGpnbrgNGGSEByo-38HHdHw3COSNEY93SQaAnOVEALw_wcB) gives you the ability to aggregate logs from all your systems and applications, analyze these logs, and create visualizations for application and infrastructure monitoring, faster troubleshooting, security analytics, and more.
 
-Here is a simple docker-compose file to create the stack on docker. I have also added the rabbitmq to push data to the logstash.
+Here is a simple [docker-compose](https://github.com/ripplejb/ekl-stack/blob/master/docker-compose.yml) file to create the stack on docker. I have also added the rabbitmq to push data to the logstash.
 
-Before you begin, open the file `logstash/pipeline/ logstash.conf` and rename the queue and index as needed. See **TODO** in the JSON below.
+Before you begin, open the file [logstash/pipeline/ logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf) and rename the queue and index as needed. See **TODO** in the JSON below.
 
 Run command `docker-compose up` to build and start the containers.
 Once containers are running, 
 1. go to [http://localhost:15672](http://localhost:15672) to rabbitmq admin. 
-2. create a queue with the same name as mentioned in the `logstash/pipeline/ logstash.conf`. See **TODO** in the JSON below.
+2. create a queue with the same name as mentioned in the [logstash/pipeline/ logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf). See **TODO** in the JSON below.
  ```
 input {
 rabbitmq {
