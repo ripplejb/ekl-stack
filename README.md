@@ -4,13 +4,13 @@
 
 Here is a simple docker-compose file to create the stack on docker. I have also added the rabbitmq to push data to the logstash.
 
-Before you begin, open the file `logstash/pipeline/ logstash.conf` and rename the queue and index as needed. See TODO in the JSON below.
+Before you begin, open the file `logstash/pipeline/ logstash.conf` and rename the queue and index as needed. See **TODO** in the JSON below.
 
 Run command `docker-compose up` to build and start the containers.
 Once containers are running, 
 1. go to [http://localhost:15672](http://localhost:15672) to rabbitmq admin. 
-2. create a queue with the same name as mentioned in the `logstash/pipeline/ logstash.conf`. See TODO in the JSON below.
- ```JSON
+2. create a queue with the same name as mentioned in the `logstash/pipeline/ logstash.conf`. See **TODO** in the JSON below.
+ ```
 input {
 rabbitmq {
     id => "rabbit01"
