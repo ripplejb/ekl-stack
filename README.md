@@ -7,7 +7,7 @@ Here is a simple [docker-compose](https://github.com/ripplejb/ekl-stack/blob/mas
 1. Install [Docker](https://docs.docker.com/get-docker/).
 1. Install [Docker-Compose](https://docs.docker.com/compose/).
 1. Checkout the [repository](https://github.com/ripplejb/ekl-stack).
-1. Run command `docker-compose up` to build and start the containers.
+1. Run command `docker-compose up` in the same folder where the `docker-compose.yml` is located to build and start the containers.
 Once containers are running, 
 1. Go to [http://localhost:15672](http://localhost:15672) to rabbitmq admin. 
 1. Create a queue named `backup-log` as mentioned in the [logstash/pipeline/logstash.conf](https://github.com/ripplejb/ekl-stack/blob/master/logstash/pipeline/logstash.conf). 
