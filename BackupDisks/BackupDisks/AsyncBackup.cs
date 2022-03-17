@@ -37,6 +37,7 @@ public class AsyncBackup
         stack.Push(src);
         while (stack.TryPop(out var dir))
         {
+            _logger.Information("Found folder {dir}");
             CreateFolder(src, dst, dir);
             var dirs = Directory.GetDirectories(dir);
             PushToStack(stack, dirs);

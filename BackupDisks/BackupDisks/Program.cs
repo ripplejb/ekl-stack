@@ -7,7 +7,7 @@ using Serilog.Sinks.RabbitMQ;
 
 if (Environment.GetCommandLineArgs().Length != 3) 
 {
-    Console.Error.WriteLine("Onvalid command line arguments");
+    Console.Error.WriteLine("On valid command line arguments");
     Console.Error.WriteLine("\t\tBackupDisks /source/path/ /destination/path/ ");
     return;
 }
