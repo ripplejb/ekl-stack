@@ -100,7 +100,7 @@ public class AsyncBackup
         var newFolder = Path.Combine(dst, new DirectoryInfo(src).Name);
         if (!src.Equals(newFolderPath))
         {
-            newFolder = Path.Combine(newFolder, newFolderPath.Substring(src.Length + 1));
+            newFolder = Path.Combine(newFolder, newFolderPath.Substring(src.Length));
         }
 
         return newFolder;
