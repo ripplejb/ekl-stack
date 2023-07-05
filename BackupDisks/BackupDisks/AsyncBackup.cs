@@ -1,3 +1,4 @@
+using System.Text;
 using System.Threading.Channels;
 using Serilog;
 
@@ -8,9 +9,11 @@ public class AsyncBackup
     private readonly Channel<string[]> _fileQueue = Channel.CreateUnbounded<string[]>();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly ILogger _logger;
+    private static string BLANK_TEXT = "";
 
     public AsyncBackup(ILogger logger)
     {
+        GenerateLargeBlankText();
         _logger = logger;
     }
 
@@ -22,8 +25,9 @@ public class AsyncBackup
     public async Task Copy(string src, string dst)
     {
         _logger.Information("Start channel");
-        await StartChannel(src, dst, _cancellationTokenSource.Token);
-        await ReadChannel(_cancellationTokenSource.Token);
+        var startChannel = StartChannel(src.EndsWith('/')?src:$"{src}/", dst.EndsWith('/')?dst:$"{dst}/", _cancellationTokenSource.Token);
+        var readChannel =  ReadChannel(_cancellationTokenSource.Token);
+        await Task.WhenAll(startChannel, readChannel);
     }
 
     private async Task StartChannel(string src, string dst, CancellationToken cancellationToken)
@@ -37,7 +41,7 @@ public class AsyncBackup
         stack.Push(src);
         while (stack.TryPop(out var dir))
         {
-            _logger.Information("Found folder {dir}");
+            _logger.Information("Found folder {Dir}", dir);
             CreateFolder(src, dst, dir);
             var dirs = Directory.GetDirectories(dir);
             PushToStack(stack, dirs);
@@ -57,14 +61,24 @@ public class AsyncBackup
                 _logger.Information("Start copying file {File}", file[0]);
                 try
                 {
-                    File.Copy(file[0], file[1]);
-                    _logger.Information("Finished copying file {File}", file[0]);
+                    if (!File.Exists(file[1]))
+                    {
+                        WriteConsole($"Start copying file {file[0]}");
+                        File.Copy(file[0], file[1]);
+                        WriteConsole($"Finished copying file {file[0]}");
+                        _logger.Information("Finished copying file {File}", file[0]);
+                    }
+                    else
+                    {
+                        WriteConsole($"File {file[0]} already exists");
+                        _logger.Information("File {File} already exists", file[1]);
+                    }
                 }
                 catch (Exception e)
                 {
                     _logger.Error(e, "Error copying file {File}", file[0]);
                 }
-            });
+            }, cancellationToken);
             if (cancellationToken.IsCancellationRequested) break;
         }
     }
@@ -106,11 +120,32 @@ public class AsyncBackup
         return newFolder;
     }
     
-    private void PushToStack(Stack<string> stack, string[] list)
+    private static void PushToStack(Stack<string> stack, IEnumerable<string> list)
     {
         foreach (var s in list)
         {
             stack.Push(s);
         }
+    }
+
+    private static void GenerateLargeBlankText()
+    {
+        if (BLANK_TEXT.Length != 0) return;
+        var sb = new StringBuilder();
+        for (var i = 0; i < 1000; i++)
+        {
+            sb.Append(' ');
+        }
+
+        BLANK_TEXT = sb.ToString();
+    }
+    
+    private static void WriteConsole(string message)
+    {
+        Console.SetCursorPosition(0, Console.WindowHeight - 10); 
+        Console.WriteLine(BLANK_TEXT);
+
+        Console.SetCursorPosition(0, Console.WindowHeight - 10); 
+        Console.WriteLine(message);
     }
 }

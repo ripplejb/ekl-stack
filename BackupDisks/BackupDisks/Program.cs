@@ -31,13 +31,14 @@ var loggerConfig = new LoggerConfiguration()
 
 var asyncBackup = new AsyncBackup(loggerConfig.CreateLogger());
 
+Console.Clear();
+Console.WriteLine("Create a file named 'Quit' to exit in the same folder as app.");
+
 asyncBackup.Copy(Environment.GetCommandLineArgs()[1], Environment.GetCommandLineArgs()[2]);
 
-Console.WriteLine("Type 'Quit' to exit.");
-var inStr = string.Empty;
-while (inStr is not "Quit")
+while (!File.Exists("Quit"))
 {
-    inStr = Console.ReadLine();
+    Thread.Sleep(10000);
 }
 asyncBackup.CancelCopy();
 Thread.Sleep(60000);
