@@ -9,7 +9,7 @@ public class AsyncBackup
     private readonly Channel<string[]> _fileQueue = Channel.CreateUnbounded<string[]>();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly ILogger _logger;
-    private static string BLANK_TEXT = "";
+    private static string _blankText = "";
 
     public AsyncBackup(ILogger logger)
     {
@@ -42,10 +42,18 @@ public class AsyncBackup
         while (stack.TryPop(out var dir))
         {
             _logger.Information("Found folder {Dir}", dir);
-            CreateFolder(src, dst, dir);
-            var dirs = Directory.GetDirectories(dir);
-            PushToStack(stack, dirs);
-            await WriteFilesToChannel(src, dst, dir, cancellationToken);
+            var success = CreateFolder(src, dst, dir);
+            if (!success) continue;
+            try
+            {
+                var dirs = Directory.GetDirectories(dir);
+                PushToStack(stack, dirs);
+                await WriteFilesToChannel(src, dst, dir, cancellationToken);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, "error writing to the channel");
+            }
         }
         
     }
@@ -54,7 +62,17 @@ public class AsyncBackup
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var file = await _fileQueue.Reader.ReadAsync(cancellationToken);
+            var file = Array.Empty<string>();
+            try
+            {
+                file = await _fileQueue.Reader.ReadAsync(cancellationToken);
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.Information(ex, "Operation cancelled");
+                break;
+            }
+
             await Task.Run(() =>
             {
                 if (cancellationToken.IsCancellationRequested) return;
@@ -80,6 +98,7 @@ public class AsyncBackup
                 }
             }, cancellationToken);
             if (cancellationToken.IsCancellationRequested) break;
+            
         }
     }
     
@@ -93,20 +112,21 @@ public class AsyncBackup
         }
     }
     
-    private void CreateFolder(string src, string dst, string newFolderPath)
+    private bool CreateFolder(string src, string dst, string newFolderPath)
     {
         var folderName = GetNewFolderName(src, dst, newFolderPath);
         _logger.Information("Create folder {FolderName}", folderName);
         try
         {
             Directory.CreateDirectory(folderName);
+            return true;
         }
         catch (Exception e)
         {
             _logger.Error(e, "Error creating folder {FolderName}", folderName);
-            throw;
         }
-        
+
+        return false;
     }
 
     private string GetNewFolderName(string src, string dst, string newFolderPath)
@@ -130,20 +150,20 @@ public class AsyncBackup
 
     private static void GenerateLargeBlankText()
     {
-        if (BLANK_TEXT.Length != 0) return;
+        if (_blankText.Length != 0) return;
         var sb = new StringBuilder();
         for (var i = 0; i < 1000; i++)
         {
             sb.Append(' ');
         }
 
-        BLANK_TEXT = sb.ToString();
+        _blankText = sb.ToString();
     }
     
     private static void WriteConsole(string message)
     {
         Console.SetCursorPosition(0, Console.WindowHeight - 10); 
-        Console.WriteLine(BLANK_TEXT);
+        Console.WriteLine(_blankText);
 
         Console.SetCursorPosition(0, Console.WindowHeight - 10); 
         Console.WriteLine(message);

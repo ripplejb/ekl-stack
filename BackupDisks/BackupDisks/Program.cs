@@ -32,14 +32,26 @@ var loggerConfig = new LoggerConfiguration()
 var asyncBackup = new AsyncBackup(loggerConfig.CreateLogger());
 
 Console.Clear();
-Console.WriteLine("Create a file named 'Quit' to exit in the same folder as app.");
 
-asyncBackup.Copy(Environment.GetCommandLineArgs()[1], Environment.GetCommandLineArgs()[2]);
-
-while (!File.Exists("Quit"))
+var taskUserInput = new Task(() =>
 {
-    Thread.Sleep(10000);
-}
-asyncBackup.CancelCopy();
+    Console.WriteLine("Type 'Quit' to exit.");
+    var strIn = "";
+    while (!strIn.Equals("Quit"))
+    {
+        strIn = Console.ReadLine() ?? "";
+    }
+    Console.WriteLine("Shutting Down...");
+    asyncBackup.CancelCopy();
+});
+taskUserInput.Start();
+
+
+var tasks = new[] { taskUserInput, 
+    asyncBackup.Copy(Environment.GetCommandLineArgs()[1], Environment.GetCommandLineArgs()[2]) 
+};
+await Task.WhenAll(tasks);
+
+
 Thread.Sleep(60000);
 
